@@ -24,8 +24,8 @@ def load_data():
 
 main_data, categories = load_data()
 
-st.set_page_config(page_title="Olist E-Commerce Dashboard", page_icon="🛒", layout="wide")
-st.title("🛒 Olist E-Commerce Dashboard")
+st.set_page_config(page_title="Olist E-Commerce Dashboard", layout="wide")
+st.title("Olist E-Commerce Dashboard")
 st.caption("Periode analisis: Jan 2017 - Agu 2018 | Sumber: Olist Brazilian E-Commerce Dataset")
 
 st.sidebar.header("Filter Data")
