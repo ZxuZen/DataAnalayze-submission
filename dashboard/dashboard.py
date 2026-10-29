@@ -7,11 +7,11 @@ st.set_page_config(page_title="Olist E-Commerce Dashboard", layout="wide")
 
 @st.cache_data
 def load_data():
-    orders = pd.read_csv(DATA_DIR / "olist_orders_dataset.csv")
-    order_items = pd.read_csv(DATA_DIR /"olist_order_items_dataset.csv")
-    reviews = pd.read_csv(DATA_DIR / "olist_order_reviews_dataset.csv")
-    products = pd.read_csv(DATA_DIR / "olist_products_dataset.csv")
-    category_tr = pd.read_csv(DATA_DIR / "product_category_name_translation.csv")
+    orders = pd.read_csv("../data/olist_orders_dataset.csv")
+    order_items = pd.read_csv("../data/olist_order_items_dataset.csv")
+    reviews = pd.read_csv("../data/olist_order_reviews_dataset.csv")
+    products = pd.read_csv("../data/olist_products_dataset.csv")
+    category_tr = pd.read_csv("../data/product_category_name_translation.csv")
 
     products['product_category_name'] = products['product_category_name'].fillna('unknown')
 
