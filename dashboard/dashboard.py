@@ -19,7 +19,7 @@ except Exception as e:
     )
     st.stop()
 
-st.set_page_config(page_title="Olist E-Commerce Dashboard", page_icon="🛒", layout="wide")
+st.set_page_config(page_title="Olist E-Commerce Dashboard", layout="wide")
 
 st.title("Olist E-Commerce Dashboard")
 st.caption("Periode analisis: Jan 2017 - Agu 2018 | Sumber: Olist Brazilian E-Commerce Dataset")
