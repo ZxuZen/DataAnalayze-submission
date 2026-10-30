@@ -4,7 +4,6 @@ from pathlib import Path
 
 st.set_page_config(
     page_title="Olist E-Commerce Dashboard", 
-    page_icon="🛒", 
     layout="wide"
 )
 
