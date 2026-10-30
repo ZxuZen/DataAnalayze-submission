@@ -127,4 +127,4 @@ elif viz_option == "Segmentasi Pelanggan (RFM)":
     st.pyplot(fig)
     
     st.dataframe(seg.round(2), use_container_width=True)
-    st.success("💡 **Insight:** 97% pelanggan adalah pembeli satu kali. Fokuskan retensi pada segmen Champions dan At Risk.")
+    st.success("**Insight:** 97% pelanggan adalah pembeli satu kali. Fokuskan retensi pada segmen Champions dan At Risk.")
