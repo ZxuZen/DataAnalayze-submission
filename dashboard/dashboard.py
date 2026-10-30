@@ -35,7 +35,7 @@ STATE_NAMES = {
 }
 main_data["state_name"] = main_data["customer_state"].map(STATE_NAMES).fillna(main_data["customer_state"])
 
-st.title("🛒 Olist E-Commerce Dashboard")
+st.title("Olist E-Commerce Dashboard")
 st.caption("Periode analisis: Jan 2017 - Agu 2018 | Sumber: Olist Brazilian E-Commerce Dataset")
 
 st.sidebar.header("Filter Data")
