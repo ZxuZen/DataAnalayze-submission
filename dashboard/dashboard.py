@@ -73,14 +73,26 @@ st.markdown("---")
 if viz_option == "Pendapatan Kategori Produk":
     st.header(f"Top {top_n} Kategori Produk dengan Revenue Tertinggi")
     top_cats = categories.head(top_n)
-    
+    max_rev = top_cats['total_revenue'].max()
+
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(data=top_cats, x='total_revenue', y='product_category_name_english', palette='viridis', ax=ax, hue='product_category_name_english', legend=False)
-    ax.set_title(f"Top {top_n} Kategori Produk Berdasarkan Revenue (BRL)", fontweight='bold')
-    ax.set_xlabel("Total Revenue (BRL)")
+    sns.barplot(data=top_cats, x='total_revenue', y='product_category_name_english',
+                palette='viridis', ax=ax,
+                hue='product_category_name_english', legend=False)
+
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: f"{x/1000:.0f}k"))
+
+    for bar in ax.patches:
+        w = bar.get_width()
+        ax.text(w + max_rev * 0.01, bar.get_y() + bar.get_height() / 2,
+                f"BRL {w:,.0f}", va='center', fontsize=9)
+
+    ax.set_xlim(0, max_rev * 1.30)   
+    ax.set_title(f"Top {top_n} Kategori Produk Berdasarkan Revenue", fontweight='bold')
+    ax.set_xlabel("Total Pendapatan (BRL)")
     ax.set_ylabel("Kategori Produk")
     st.pyplot(fig)
-    st.info("💡 **Eksplorasi:** Gunakan slider di atas untuk melihat lebih banyak atau lebih sedikit kategori produk.")
+    st.info("💡 **Insight:** health_beauty, watches_gifts, dan bed_bath_table adalah tiga kontributor revenue terbesar (±25,9% total).")
 
 elif viz_option == "Dampak Keterlambatan Pengiriman":
     st.header("Dampak Keterlambatan Pengiriman terhadap Review Score")
