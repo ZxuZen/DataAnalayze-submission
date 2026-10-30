@@ -2,7 +2,28 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
+st.set_page_config(
+    page_title="Olist E-Commerce Dashboard", 
+    page_icon="🛒", 
+    layout="wide"
+)
+
 BASE_DIR = Path(__file__).resolve().parent
+
+@st.cache_data
+def load_data():
+    main_data = pd.read_csv(BASE_DIR / "main_data.csv")
+    categories = pd.read_csv(BASE_DIR / "categories.csv")
+    return main_data, categories
+
+try:
+    main_data, categories = load_data()
+except Exception as e:
+    st.error(
+        "Gagal memuat data. Pastikan file main_data.csv dan categories.csv "
+        f"berada di folder dashboard/. Detail error: {e}"
+    )
+    st.stop()
 
 STATE_NAMES = {
     "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas",
@@ -13,19 +34,9 @@ STATE_NAMES = {
     "RS": "Rio Grande do Sul", "RO": "Rondônia", "RR": "Roraima", "SC": "Santa Catarina",
     "SP": "São Paulo", "SE": "Sergipe", "TO": "Tocantins",
 }
+main_data["state_name"] = main_data["customer_state"].map(STATE_NAMES).fillna(main_data["customer_state"])
 
-@st.cache_data
-def load_data():
-    main_data = pd.read_csv(BASE_DIR / "main_data.csv")
-    categories = pd.read_csv(BASE_DIR / "categories.csv")
-    main_data["state_name"] = (main_data["customer_state"].map(STATE_NAMES)
-                               .fillna(main_data["customer_state"]))
-    return main_data, categories
-
-main_data, categories = load_data()
-
-st.set_page_config(page_title="Olist E-Commerce Dashboard", layout="wide")
-st.title("Olist E-Commerce Dashboard")
+st.title("🛒 Olist E-Commerce Dashboard")
 st.caption("Periode analisis: Jan 2017 - Agu 2018 | Sumber: Olist Brazilian E-Commerce Dataset")
 
 st.sidebar.header("Filter Data")
@@ -57,6 +68,7 @@ c3.metric("Rata-rata Review Score", f"{df['review_score'].mean():.2f}")
 c4.metric("Tingkat Keterlambatan", f"{(df['delivery_status'] == 'Late').mean() * 100:.1f}%")
 
 st.markdown("---")
+
 st.subheader("1. Top 10 Kategori Produk dengan Revenue Tertinggi")
 top10 = categories.head(10).set_index("product_category_name_english")["total_revenue"]
 st.bar_chart(top10)
