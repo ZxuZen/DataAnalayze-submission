@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from pathlib import Path
 
-st.set_page_config(
-    page_title="Olist E-Commerce Dashboard", 
-    layout="wide"
-)
+st.set_page_config(page_title="Olist E-Commerce Dashboard", page_icon="🛒", layout="wide")
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -18,10 +17,7 @@ def load_data():
 try:
     main_data, categories = load_data()
 except Exception as e:
-    st.error(
-        "Gagal memuat data. Pastikan file main_data.csv dan categories.csv "
-        f"berada di folder dashboard/. Detail error: {e}"
-    )
+    st.error(f"Gagal memuat data. Pastikan main_data.csv dan categories.csv ada di folder dashboard/. Detail: {e}")
     st.stop()
 
 STATE_NAMES = {
@@ -35,62 +31,88 @@ STATE_NAMES = {
 }
 main_data["state_name"] = main_data["customer_state"].map(STATE_NAMES).fillna(main_data["customer_state"])
 
-st.title("Olist E-Commerce Dashboard")
-st.caption("Periode analisis: Jan 2017 - Agu 2018 | Sumber: Olist Brazilian E-Commerce Dataset")
+st.title("🛒 Olist E-Commerce Dashboard")
+st.markdown("Dashboard ini memungkinkan Anda untuk melakukan **eksplorasi dan manipulasi data secara langsung** menggunakan filter dan widget interaktif.")
 
-st.sidebar.header("Filter Data")
-months = sorted(main_data["order_month"].unique())
+st.sidebar.header("🔍 Filter Eksplorasi Data")
 states = sorted(main_data["state_name"].dropna().unique())
-statuses = sorted(main_data["delivery_status"].unique())
-segments = sorted(main_data["segment"].dropna().unique())
+sel_states = st.sidebar.multiselect(
+    "Pilih Provinsi (Brazil):", 
+    states, 
+    default=states,
+    help="Pilih satu atau beberapa provinsi untuk memfilter data secara langsung."
+)
 
-sel_months = st.sidebar.multiselect("Bulan", months, default=months)
-sel_states = st.sidebar.multiselect("Provinsi Pelanggan (Brazil)", states, default=states)
-sel_status = st.sidebar.multiselect("Status Pengiriman", statuses, default=statuses)
-sel_segment = st.sidebar.multiselect("Segmen RFM", segments, default=segments)
-
-df = main_data[
-    main_data["order_month"].isin(sel_months)
-    & main_data["state_name"].isin(sel_states)
-    & main_data["delivery_status"].isin(sel_status)
-    & main_data["segment"].isin(sel_segment)
-]
+df = main_data[main_data["state_name"].isin(sel_states)]
 
 if df.empty:
-    st.warning("Kombinasi filter tidak menghasilkan data. Silakan longgarkan filter.")
+    st.warning("Tidak ada data untuk provinsi yang dipilih. Silakan ubah filter.")
     st.stop()
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Total Pesanan", f"{len(df):,}")
-c2.metric("Total Revenue (BRL)", f"{df['order_value'].sum():,.0f}")
-c3.metric("Rata-rata Review Score", f"{df['review_score'].mean():.2f}")
-c4.metric("Tingkat Keterlambatan", f"{(df['delivery_status'] == 'Late').mean() * 100:.1f}%")
+st.subheader("⚙️ Manipulasi Visualisasi")
+col1, col2 = st.columns(2)
+
+with col1:
+    viz_option = st.selectbox(
+        "1. Pilih Jenis Analisis:",
+        ("Pendapatan Kategori Produk", "Dampak Keterlambatan Pengiriman", "Segmentasi Pelanggan (RFM)")
+    )
+
+with col2:
+    top_n = st.slider(
+        "2. Atur Jumlah Data yang Ditampilkan (Top N):", 
+        min_value=5, 
+        max_value=20, 
+        value=10, 
+        step=1,
+        help="Geser slider ini untuk memanipulasi jumlah kategori yang ditampilkan pada chart secara langsung."
+    )
 
 st.markdown("---")
 
-st.subheader("1. Top 10 Kategori Produk dengan Revenue Tertinggi")
-top10 = categories.head(10).set_index("product_category_name_english")["total_revenue"]
-st.bar_chart(top10)
-st.caption("**Insight:** health_beauty, watches_gifts, bed_bath_table = 3 kontributor terbesar (±25,9% revenue).")
+if viz_option == "Pendapatan Kategori Produk":
+    st.header(f"Top {top_n} Kategori Produk dengan Revenue Tertinggi")
+    top_cats = categories.head(top_n)
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(data=top_cats, x='total_revenue', y='product_category_name_english', palette='viridis', ax=ax, hue='product_category_name_english', legend=False)
+    ax.set_title(f"Top {top_n} Kategori Produk Berdasarkan Revenue (BRL)", fontweight='bold')
+    ax.set_xlabel("Total Revenue (BRL)")
+    ax.set_ylabel("Kategori Produk")
+    st.pyplot(fig)
+    st.info("💡 **Eksplorasi:** Gunakan slider di atas untuk melihat lebih banyak atau lebih sedikit kategori produk.")
 
-st.subheader("2. Dampak Keterlambatan Pengiriman terhadap Review Score")
-delay_order = ["Tepat Waktu / Lebih Cepat", "Telat 1-3 Hari", "Telat 4-7 Hari", "Telat > 7 Hari"]
-delay_score = df.groupby("delay_category")["review_score"].mean().reindex(delay_order).dropna()
-st.bar_chart(delay_score)
-st.caption("**Insight:** semakin parah keterlambatan, semakin rendah review score (4,29 → 1,70).")
+elif viz_option == "Dampak Keterlambatan Pengiriman":
+    st.header("Dampak Keterlambatan Pengiriman terhadap Review Score")
+    
+    delay_order = ["Tepat Waktu / Lebih Cepat", "Telat 1-3 Hari", "Telat 4-7 Hari", "Telat > 7 Hari"]
+    delay_score = df.groupby("delay_category")["review_score"].mean().reindex(delay_order).dropna().reset_index()
+    
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(data=delay_score, x='delay_category', y='review_score', palette='magma', ax=ax, hue='delay_category', legend=False)
+    ax.set_ylim(0, 5)
+    ax.set_title("Rata-rata Review Score berdasarkan Kategori Keterlambatan", fontweight='bold')
+    ax.set_xlabel("Status Keterlambatan")
+    ax.set_ylabel("Rata-rata Review Score")
+    
+    for i in range(len(delay_score)):
+        ax.text(i, delay_score['review_score'].iloc[i] + 0.1, f"{delay_score['review_score'].iloc[i]:.2f}", ha='center', fontweight='bold')
+        
+    st.pyplot(fig)
+    st.warning("⚠️ **Insight:** Keterlambatan > 7 hari membuat skor anjlok drastis ke 1.70.")
 
-st.subheader("3. Tren Revenue & Jumlah Pesanan per Bulan")
-monthly = df.groupby("order_month").agg(
-    Revenue=("order_value", "sum"),
-    Jumlah_Pesanan=("order_id", "count"),
-)
-st.line_chart(monthly)
-
-st.subheader("4. Distribusi Pelanggan per Segmen RFM")
-seg = df.groupby("segment").agg(
-    Jumlah_Pelanggan=("customer_unique_id", "nunique"),
-    Rata_Monetary=("order_value", "mean"),
-).sort_values("Jumlah_Pelanggan", ascending=False)
-st.bar_chart(seg["Jumlah_Pelanggan"])
-st.dataframe(seg.round(2))
-st.caption("**Insight:** 97% pelanggan satu kali; segmen berulang monetary ±2× lebih besar.")
+elif viz_option == "Segmentasi Pelanggan (RFM)":
+    st.header("Distribusi Pelanggan per Segmen RFM")
+    
+    seg = df.groupby("segment").agg(
+        Jumlah_Pelanggan=("customer_unique_id", "nunique"),
+        Rata_Monetary=("order_value", "mean"),
+    ).sort_values("Jumlah_Pelanggan", ascending=False).reset_index()
+    
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.barplot(data=seg, x='segment', y='Jumlah_Pelanggan', palette='Blues_d', ax=ax, hue='segment', legend=False)
+    ax.set_title("Jumlah Pelanggan per Segmen RFM", fontweight='bold')
+    st.pyplot(fig)
+    
+    st.dataframe(seg.round(2), use_container_width=True)
+    st.success("💡 **Insight:** 97% pelanggan adalah pembeli satu kali. Fokuskan retensi pada segmen Champions dan At Risk.")
