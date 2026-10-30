@@ -34,7 +34,7 @@ main_data["state_name"] = main_data["customer_state"].map(STATE_NAMES).fillna(ma
 st.title("Olist E-Commerce Dashboard")
 st.markdown("Dashboard ini memungkinkan Anda untuk melakukan **eksplorasi dan manipulasi data secara langsung** menggunakan filter dan widget interaktif.")
 
-st.sidebar.header("🔍 Filter Eksplorasi Data")
+st.sidebar.header("Filter Eksplorasi Data")
 states = sorted(main_data["state_name"].dropna().unique())
 sel_states = st.sidebar.multiselect(
     "Pilih Provinsi (Brazil):", 
@@ -49,7 +49,7 @@ if df.empty:
     st.warning("Tidak ada data untuk provinsi yang dipilih. Silakan ubah filter.")
     st.stop()
 
-st.subheader("⚙️ Manipulasi Visualisasi")
+st.subheader("Manipulasi Visualisasi")
 col1, col2 = st.columns(2)
 
 with col1:
@@ -92,7 +92,7 @@ if viz_option == "Pendapatan Kategori Produk":
     ax.set_xlabel("Total Pendapatan (BRL)")
     ax.set_ylabel("Kategori Produk")
     st.pyplot(fig)
-    st.info("💡 **Insight:** health_beauty, watches_gifts, dan bed_bath_table adalah tiga kontributor revenue terbesar (±25,9% total).")
+    st.info("**Insight:** health_beauty, watches_gifts, dan bed_bath_table adalah tiga kontributor revenue terbesar (±25,9% total).")
 
 elif viz_option == "Dampak Keterlambatan Pengiriman":
     st.header("Dampak Keterlambatan Pengiriman terhadap Review Score")
@@ -111,7 +111,7 @@ elif viz_option == "Dampak Keterlambatan Pengiriman":
         ax.text(i, delay_score['review_score'].iloc[i] + 0.1, f"{delay_score['review_score'].iloc[i]:.2f}", ha='center', fontweight='bold')
         
     st.pyplot(fig)
-    st.warning("⚠️ **Insight:** Keterlambatan > 7 hari membuat skor anjlok drastis ke 1.70.")
+    st.warning("**Insight:** Keterlambatan > 7 hari membuat skor anjlok drastis ke 1.70.")
 
 elif viz_option == "Segmentasi Pelanggan (RFM)":
     st.header("Distribusi Pelanggan per Segmen RFM")
