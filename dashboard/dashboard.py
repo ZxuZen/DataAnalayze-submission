@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 
-st.set_page_config(page_title="Olist E-Commerce Dashboard", page_icon="🛒", layout="wide")
+st.set_page_config(page_title="Olist E-Commerce Dashboard", layout="wide")
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -31,7 +31,7 @@ STATE_NAMES = {
 }
 main_data["state_name"] = main_data["customer_state"].map(STATE_NAMES).fillna(main_data["customer_state"])
 
-st.title("🛒 Olist E-Commerce Dashboard")
+st.title("Olist E-Commerce Dashboard")
 st.markdown("Dashboard ini memungkinkan Anda untuk melakukan **eksplorasi dan manipulasi data secara langsung** menggunakan filter dan widget interaktif.")
 
 st.sidebar.header("🔍 Filter Eksplorasi Data")
